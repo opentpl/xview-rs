@@ -1,0 +1,19 @@
+{
+  "name": "otpl-xview",
+  "version": "1.0.0",
+  "description": "rust otpl",
+  "main": "index.js",
+  "scripts": {
+    "clean": "cargo clean",
+    "build": "cargo build",
+    "start": "npm run clean && npm run build && node ./lib"
+  },
+  "repository": {},
+  "author": "junhwong <jun@diosay.com>",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "ffi": "^2.2.0"
+  }
+}

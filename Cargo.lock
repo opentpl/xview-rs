@@ -1,0 +1,11 @@
+[root]
+name = "otpl_xview"
+version = "0.1.0"
+dependencies = [
+ "libotpl 0.1.0",
+]
+
+[[package]]
+name = "libotpl"
+version = "0.1.0"
+

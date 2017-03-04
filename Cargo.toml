@@ -1,0 +1,10 @@
+[package]
+name = "otpl_xview"
+version = "0.1.0"
+authors = ["jun"]
+include = ["src/**/*", "Cargo.toml"]
+[lib]
+crate-type = ["rlib", "dylib"]
+
+[dependencies]
+libotpl = { path = "../libotpl" }

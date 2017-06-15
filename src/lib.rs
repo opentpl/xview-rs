@@ -1,3 +1,7 @@
+mod prelude;
+mod compiler;
+//use compiler;
+
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
@@ -7,10 +11,11 @@ fn str_safe(src:*const c_char) -> String{
 
 #[allow(unused_variables)]
 #[no_mangle]
-pub extern "C" fn complie(src:*const c_char, filename:*const c_char, mode: i32,line: i32,column: i32) -> *const c_char{
+pub extern "C" fn complie(src:*const c_char, filename:*const c_char, dir:*const c_char) -> *const c_char{
     let src = str_safe(src);
     let filename = str_safe(filename);
-    let result:String = format!("{{{0}, {1}", "test.xx", src);
+    let dir = str_safe(dir);
+    let result:String = format!("{}, {}, {}", src,filename, dir);
     let cs = CString::new(result).unwrap();
     return cs.into_raw();
 }

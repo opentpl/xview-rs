@@ -1,11 +1,11 @@
 [root]
-name = "otpl_xview"
+name = "xview_rs"
 version = "0.1.0"
 dependencies = [
- "libotpl 0.1.0",
+ "otpl 0.1.0",
 ]
 
 [[package]]
-name = "libotpl"
+name = "otpl"
 version = "0.1.0"
 

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/react/15.5.4/react.min.js"></script>
+    <script src="https://cdn.bootcss.com/react/15.5.4/react-dom.min.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        let GeneratorToArray = iter => {
+            let arr = []
+            if (!iter) return arr
+            for (let item of iter) {
+                arr.push(item)
+            }
+            return arr
+        }
+
+        let i = 4
+        let arrb = GeneratorToArray((function* () {
+            yield "hi"
+            if (i < 5) {
+                yield " 周三"
+            }
+            else { yield " 历史" }
+        })())
+
+        class Context {
+            constructor(component) {
+                this.component = component
+            }
+            get(name, obj) {
+                console.log(this.component, name, obj)
+                obj = obj || this.component
+                return obj[name]
+            }
+            createElement(type, props, children) {
+                children = xview.GeneratorToArray(children)
+                //
+                //if (arr.length == 0) return undefined
+                return React.createElement(type, xview.procProperties(props), children.length == 0 ? undefined : children)
+            }
+            root(iter) {
+                let arr = xview.GeneratorToArray(iter)
+                if (!arr || arr.length == 0) return null
+                if (arr.length == 1 && typeof arr[0] == 'object' && arr[0].$$typeof) return arr[0]
+                return React.createElement('div', null, arr)
+            }
+        }
+
+        let xview = {
+            GeneratorToArray,
+            createElement: React.createElement,
+            getDenined: n => n,
+            procProperties: props => {
+                if (props.hasOwnProperty("class")) {
+                    let obj = {}
+                    for (var key in props) {
+                        if (key != "class") {
+                            obj[key] = props[key]
+                        } else {
+                            obj["className"] = props[key]
+                        }
+                    }
+                    props = obj
+                }
+                if (props.style && typeof props.style == 'string') {
+                    let styles = {}
+                    for (let item of props.style.split(',')) {
+                        let i = item.indexOf(':')
+                        if (i > 0) {
+                            styles[item.substr(0, i)] = item.substr(i + 1)
+                        }
+                    }
+                    props.style = styles
+                }
+                return props
+            },
+            createContext(component) {
+                return new Context(component)
+            }
+
+        }
+
+        console.log(arrb)
+
+
+
+        class Component extends React.Component {
+            constructor(props) {
+                super(props)
+                this.state = {}
+            }
+            //自动生成
+            render() {
+                return Component.render(xview.createContext(this))
+            }
+        }
+        Component.render = context => {
+            return context.root((function* () {
+                if (context.get('i') == 0) {
+                    yield context.createElement('div', {}, (function* () {
+                        yield `if`
+                    })())
+                } else if (context.get('i') == 1) {
+                    yield context.createElement('div', {}, (function* () {
+                        yield `else if`
+                    })())
+                } else {
+                    yield context.createElement('div', {}, (function* () {
+                        yield `else`
+                        if (context.get('i') == 0) {
+                            yield context.createElement('div', {}, (function* () {
+                                yield `nesting if`
+                            })())
+                        } else if (context.get('i') == 1) {
+                            yield context.createElement('div', {}, (function* () {
+                                yield `nesting else if`
+                            })())
+                        } else {
+                            yield context.createElement('div', {}, (function* () {
+                                yield `nesting else`
+                            })())
+                        }
+                    })())
+                }
+            })()
+            )
+        }
+
+        Component.stateless = () => {
+            return function (props) {
+                return Component.render(xview.createContext({ props }))
+            }
+        }
+
+        //import Component from './my.xview'
+
+        class Hello extends Component {
+            constructor(props) {
+                super(props)
+                this.state = {
+                    i: 1
+                }
+            }
+            get i() { return 0 }
+        }
+
+        ReactDOM.render(
+            React.createElement(Hello, { toWhat: 'World' }),
+            document.getElementById('root')
+        )
+    </script>
+</body>
+
+</html>

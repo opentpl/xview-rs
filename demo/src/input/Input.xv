@@ -1,0 +1,3 @@
+<div class={{['el-input']}} >
+    <input ref="input" type={{props.type}} class="el-input__inner" value={{props.value}} ::onChange="handleChange" />
+</div>

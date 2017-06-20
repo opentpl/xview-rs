@@ -18,30 +18,36 @@ module.exports = function (source, map) {
     let output = `module.exports = function(){};`
     output = compile(source, file, dir)
     console.log('output:\n')
-    console.log(output)
-    output= 'return 1'
-    output = `import xview from 'xview-react'
-const render = context => {
-    ${output}
-}
-
-export const { Component } = xview
-Component.prototype.render = function () {
-    return render(xview.createContext(this))
-}
-
-export const create = members => {
-    members = members || {}
-    members.render = Component.prototype.render
-    return xview.React.createClass(members)
-}
-
-export default (props, context) => {
-    context = context || xview.createContext({ props })
-    return render(context)
-}
+    // console.log(output)
+    // output= 'return 1'
+    output = `import { generate } from 'xview-react'
+export const { Component, stateless } =  generate(${output})
+export default stateless
     `
-
+    console.log(output)
 
     this.callback(null, output, map)
 }
+
+// const render = context => (flattenChildren((${output})(context)))
+// //deprecated
+// //export const { PropTypes } = xview.React
+// export class Component extends xview.Component {
+//     constructor(props) {
+//         super(props)
+//     }
+//     render() {
+//         return render(xview.createContext(this))
+//     }
+// }
+// //deprecated
+// export const create = members => {
+//     members = members || {}
+//     members.render = Component.prototype.render
+//     return xview.React.createClass(members)
+// }
+
+// export default (props, context) => {
+//     context = context || xview.createContext({ props })
+//     return render(context)
+// }

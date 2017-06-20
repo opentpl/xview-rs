@@ -1,1 +1,5 @@
 div
+<Input ref="input" :value="state.value"/> {{state.value}}
+<br/>
+<Button key="dfg" loading={{false}} ::onClick="onClick">press</Button>
+<Button key="sdas" ::onClick="onClick2">get</Button>

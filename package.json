@@ -1,18 +1,19 @@
 {
-  "name": "otpl-xview",
+  "name": "xview-loader",
   "version": "1.0.0",
   "description": "rust otpl",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "clean": "cargo clean",
     "build": "cargo build",
-    "start": "npm run clean && npm run build && node ./lib",
-    "test": "node ./lib"
+    "start": "npm run clean && npm run build",
+    "test": "node ./lib/test.js"
   },
   "repository": {},
   "author": "junhwong <jun@diosay.com>",
   "license": "MIT",
   "dependencies": {
+    "loader-utils": "^1.1.0"
   },
   "devDependencies": {
     "ffi": "^2.2.0"

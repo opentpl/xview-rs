@@ -85,15 +85,18 @@ module.exports = {
         ]
     },
     plugins: [
+        //http://www.imooc.com/article/10969
         // new webpack.DllPlugin({
         //     path: path.join(__dirname, 'build', '[name]-manifest.json'),
         //     name: '[name]_[hash]'
         // })
+        new webpack.optimize.ModuleConcatenationPlugin(),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
             },
         }),
+        // new HtmlWebpackPlugin({ filename: './index-release.html', template: path.resolve('index.template'), inject: 'body' }),
         new webpack.optimize.OccurrenceOrderPlugin(),
         new ExtractTextPlugin('[name].css'),
         new webpack.optimize.CommonsChunkPlugin({

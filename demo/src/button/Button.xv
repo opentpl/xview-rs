@@ -1,13 +1,13 @@
-
-
-
 <button class={{['el-button'
                 , props.type & 'el-button--' + props.type
                 , props.size & 'el-button--' + props.size
                 , props.disabled & 'is-disabled'
                 , props.loading & 'is-loading'
                 , props.plain & 'is-plain'
-                ]}} disabled={{props.disabled}} type={{props.nativeType}} ::onClick="onClick" >
+                ]}}
+        disabled={{props.disabled}}
+        type={{props.nativeType}}
+        @onClick="handleClick">
     <i class="el-icon-loading" @if="props.loading" />
     <i class={{'el-icon-' + props.icon}} @if="props.loading && !props.loading" />
     <span>{{props.children}}</span>

@@ -1,21 +1,38 @@
 import { Component } from './Button'
+import { Component as Group } from './Group'
+import PropTypes from 'prop-types'
+
 export default class Button extends Component {
-    constructor(props) {
-        super(props)
-    }
-    onClick(e) {
+    /**
+     * @private 
+     */
+    handleClick(e) {
         if (this.props.onClick) {
             this.props.onClick(e);
         }
     }
-}
-
-import { Component as GroupComponent } from './Group'
-class Group extends GroupComponent {
-    constructor(props) {
-        super(props)
+    click(e) {
+        this.handleClick(e)
     }
 }
 
 Button.Group = Group
 
+Button.propTypes = {
+    onClick: PropTypes.func,
+    type: PropTypes.string,
+    size: PropTypes.string,
+    icon: PropTypes.string,
+    nativeType: PropTypes.string,
+    loading: PropTypes.bool,
+    disabled: PropTypes.bool,
+    plain: PropTypes.bool
+}
+
+Button.defaultProps = {
+    type: 'default',
+    nativeType: 'button',
+    loading: false,
+    disabled: false,
+    plain: false
+}

@@ -32,7 +32,7 @@ const procProperties = (props, { owner }) => {
         }
         props.style = styles
     }
-    let rst = {}
+    let ret = {}
     for (let key in props) {
         if (isArray(props[key])) {
             let arr = []
@@ -47,8 +47,8 @@ const procProperties = (props, { owner }) => {
                 props[key] = arr
             }
         }
-        if (key.startsWith('::')) {
-            let name = key.substr(2)
+        if (key.startsWith('@')) {
+            let name = key.substr(1)
             let value = 'owner.' + props[key]
             // if(value.startsWith("props")){
             //     value='owner.'+value
@@ -56,19 +56,19 @@ const procProperties = (props, { owner }) => {
             if (value.indexOf('(') < 0) {
                 value += '.bind(owner)'
             }
-            rst[name] = eval(value)
+            ret[name] = eval(value)
         } else if (key.startsWith(':')) {
             let name = key.substr(1)
             let value = props[key]
             //console.log('twoWay:',name, value, key, props[key])
-            rst[name] = eval('owner.' + value)
-            rst['onChange'] = owner.getValueChangeEvent(value).bind(owner)
+            ret[name] = eval('owner.' + value)
+            ret['onChange'] = owner.getValueChangeEvent(value).bind(owner)
         } else {
-            rst[key] = props[key]
+            ret[key] = props[key]
         }
     }
-    //console.log(rst)
-    return rst
+    //console.log(ret)
+    return ret
 }
 
 export const createElement = React.createElement
@@ -95,10 +95,39 @@ class Context {
         this.owner = owner || {}
     }
     getDenined(type) {
-        //TODO
+        let index = type.indexOf('.')
+        if (index > 0) {
+            let host = this.getDenined(type.substr(0, index))
+            let suffix = type.substr(index + 1)
+            index = suffix.indexOf('.')
+            while (index > 0 && host && typeof host !== 'string') {
+                host = host[suffix.substr(0, index)]
+                suffix = suffix.substr(index + 1)
+                index = suffix.indexOf('.')
+            }
+            while (host && typeof host !== 'string') {
+                if (suffix.length > 0) {
+                    host = host[suffix]
+                    suffix = ''
+                } else {
+                    return host
+                }
+            }
+        }
+
+        if (this.owner.constructor && this.owner.constructor.components && this.owner.constructor.components[type]) {
+            return this.owner.constructor.components[type]
+        }
+        if (this.owner.components && this.owner.components[type]) {
+            return this.owner.components[type]
+        }
         if (components[type]) {
             return components[type]
         }
+        if (this.owner.componentName && this.owner.componentName() === type) {
+            return this.owner.constructor
+        }
+
         return type
     }
     get(name, obj) {
@@ -107,17 +136,18 @@ class Context {
     }
     createElement(type, props, children) {
         props = procProperties(props, this)
-        //console.log(flattenChildren(children, false))
         return createElement(this.getDenined(type, props), props, flattenChildren(children, false))
     }
     transOutput(obj, escape, toIter) {
+        if (escape && typeof obj === 'string') {
+            //TODO: escape...
+        }
         if (toIter === true) {
             if (obj === null || obj === undefined) return []
+            else if (typeof obj === 'string') return [obj]            
             else if (obj[Symbol.iterator] || isArray(obj)) return obj
-            else if (typeof obj === 'string') return [obj] //escape
             else return [obj]
         }
-        if (typeof obj === 'string') return [obj] //escape
         return obj
     }
     nullValue(test, value) {
@@ -137,6 +167,13 @@ class Context {
         }
         if (!test) return undefined
         return value
+    }
+}
+
+const regisiter = registrations => {
+    registrations = registrations || {}
+    for (var name in registrations) {
+        components[name] = registrations[name]
     }
 }
 
@@ -161,8 +198,16 @@ export const generate = render => {
             return flattenChildren(render(new Context(this)))
         }
     }
+    Component.prototype.componentName = function () {
+        let val = this.toString().match(/function\s*([^(]*)\(/)
+        if (val && val.length > 1) {
+            return val[1]
+        }
+        return undefined
+    }
     return {
         Component,
+        regisiter,
         stateless(props, context) {
             let ctx = context || new Context({ props })
             return flattenChildren(render(ctx))
@@ -177,14 +222,8 @@ export default {
     createElement,
     Component: React.Component,
     render: ReactDom.render,
+    regisiter,
     createContext(component) {
         return new Context(component)
-    },
-    regisiter(registrations) {
-        registrations = registrations || {}
-        for (var name in registrations) {
-            components[name] = registrations[name]
-        }
     }
-
 }

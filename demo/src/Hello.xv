@@ -1,5 +1,11 @@
 div
-<Input ref="input" :value="state.value"/> {{state.value}}
+<Input ref="input" :value="state.value" format="number(2)"/> {{state.value}}
 <br/>
-<Button key="dfg" loading={{false}} ::onClick="onClick">press</Button>
-<Button key="sdas" ::onClick="onClick2">get</Button>
+<Button loading={{false}} @onClick="onClick">press</Button>
+<Button @onClick="onClick2">get</Button>
+<Button @onClick="onClick2" loading={{true}}>loading</Button>
+<br/>
+<Button.Group>
+    <Button @onClick="onClick2">A</Button>
+    <Button @onClick="onClick2">B</Button>
+</Button.Group>

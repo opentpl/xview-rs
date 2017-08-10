@@ -270,8 +270,14 @@ impl<'a> Visitor for Compiler<'a> {
                 self.write(tok.value())?;
                 self.write("`".as_ref())?;
             }
-            &Constant::Float(ref i, ref d) => {}
-            &Constant::Integer(ref i) => {}
+            &Constant::Float(ref i, ref d) => {
+                self.write(i.value())?;
+                self.write(".".as_ref())?;
+                self.write(d.value())?;
+            }
+            &Constant::Integer(ref i) => {
+                self.write(i.value())?;
+            }
             _ => unreachable!()
         }
         return Ok(());

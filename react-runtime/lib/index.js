@@ -123,7 +123,7 @@ var procProperties = function procProperties(props, _ref) {
 
         props.style = styles;
     }
-    var rst = {};
+    var ret = {};
     for (var _key in props) {
         if (isArray(props[_key])) {
             var arr = [];
@@ -160,8 +160,8 @@ var procProperties = function procProperties(props, _ref) {
                 props[_key] = arr;
             }
         }
-        if (_key.startsWith('::')) {
-            var name = _key.substr(2);
+        if (_key.startsWith('@')) {
+            var name = _key.substr(1);
             var value = 'owner.' + props[_key];
             // if(value.startsWith("props")){
             //     value='owner.'+value
@@ -169,19 +169,19 @@ var procProperties = function procProperties(props, _ref) {
             if (value.indexOf('(') < 0) {
                 value += '.bind(owner)';
             }
-            rst[name] = eval(value);
+            ret[name] = eval(value);
         } else if (_key.startsWith(':')) {
             var _name = _key.substr(1);
             var _value = props[_key];
             //console.log('twoWay:',name, value, key, props[key])
-            rst[_name] = eval('owner.' + _value);
-            rst['onChange'] = owner.setPropertyChangeEvent(_value).bind(owner);
+            ret[_name] = eval('owner.' + _value);
+            ret['onChange'] = owner.getValueChangeEvent(_value).bind(owner);
         } else {
-            rst[_key] = props[_key];
+            ret[_key] = props[_key];
         }
     }
-    //console.log(rst)
-    return rst;
+    //console.log(ret)
+    return ret;
 };
 
 var _createElement = _react2.default.createElement;
@@ -213,10 +213,39 @@ var Context = function () {
     (0, _createClass3.default)(Context, [{
         key: 'getDenined',
         value: function getDenined(type) {
-            //TODO
+            var index = type.indexOf('.');
+            if (index > 0) {
+                var host = this.getDenined(type.substr(0, index));
+                var suffix = type.substr(index + 1);
+                index = suffix.indexOf('.');
+                while (index > 0 && host && typeof host !== 'string') {
+                    host = host[suffix.substr(0, index)];
+                    suffix = suffix.substr(index + 1);
+                    index = suffix.indexOf('.');
+                }
+                while (host && typeof host !== 'string') {
+                    if (suffix.length > 0) {
+                        host = host[suffix];
+                        suffix = '';
+                    } else {
+                        return host;
+                    }
+                }
+            }
+
+            if (this.owner.constructor && this.owner.constructor.components && this.owner.constructor.components[type]) {
+                return this.owner.constructor.components[type];
+            }
+            if (this.owner.components && this.owner.components[type]) {
+                return this.owner.components[type];
+            }
             if (components[type]) {
                 return components[type];
             }
+            if (this.owner.componentName && this.owner.componentName() === type) {
+                return this.owner.constructor;
+            }
+
             return type;
         }
     }, {
@@ -228,18 +257,18 @@ var Context = function () {
     }, {
         key: 'createElement',
         value: function createElement(type, props, children) {
-            props = procProperties(props, this
-            //console.log(flattenChildren(children, false))
-            );return _createElement(this.getDenined(type, props), props, flattenChildren(children, false));
+            props = procProperties(props, this);
+            return _createElement(this.getDenined(type, props), props, flattenChildren(children, false));
         }
     }, {
         key: 'transOutput',
         value: function transOutput(obj, escape, toIter) {
-            if (toIter === true) {
-                if (obj === null || obj === undefined) return [];else if (obj[_iterator5.default] || isArray(obj)) return obj;else if (typeof obj === 'string') return [obj]; //escape
-                else return [obj];
+            if (escape && typeof obj === 'string') {
+                //TODO: escape...
             }
-            if (typeof obj === 'string') return [obj]; //escape
+            if (toIter === true) {
+                if (obj === null || obj === undefined) return [];else if (typeof obj === 'string') return [obj];else if (obj[_iterator5.default] || isArray(obj)) return obj;else return [obj];
+            }
             return obj;
         }
     }, {
@@ -266,6 +295,13 @@ var Context = function () {
     return Context;
 }();
 
+var regisiter = function regisiter(registrations) {
+    registrations = registrations || {};
+    for (var name in registrations) {
+        components[name] = registrations[name];
+    }
+};
+
 var generate = exports.generate = function generate(_render) {
     var Component = function (_React$Component) {
         (0, _inherits3.default)(Component, _React$Component);
@@ -276,12 +312,8 @@ var generate = exports.generate = function generate(_render) {
         }
 
         (0, _createClass3.default)(Component, [{
-            key: 'setPropertyChangeEvent',
-
-            // constructor(props) {
-            //     super(props)
-            // }
-            value: function setPropertyChangeEvent(name) {
+            key: 'getValueChangeEvent',
+            value: function getValueChangeEvent(name) {
                 var bindings = this.bindings;
 
                 if (bindings && bindings[name]) {
@@ -289,13 +321,13 @@ var generate = exports.generate = function generate(_render) {
                 }
 
                 return function (value) {
+                    // TODO: 干掉 eval
                     if (name.startsWith('state.')) {
                         eval('this.setState(state => ' + name + ' = value)');
                     } else {
                         eval('this.' + name + ' = value)');
                     }
                 };
-                //console.error('binding error: not unimplemented setPropertyChangeEvent with:', name)
             }
         }, {
             key: 'render',
@@ -306,8 +338,16 @@ var generate = exports.generate = function generate(_render) {
         return Component;
     }(_react2.default.Component);
 
+    Component.prototype.componentName = function () {
+        var val = this.toString().match(/function\s*([^(]*)\(/);
+        if (val && val.length > 1) {
+            return val[1];
+        }
+        return undefined;
+    };
     return {
         Component: Component,
+        regisiter: regisiter,
         stateless: function stateless(props, context) {
             var ctx = context || new Context({ props: props });
             return flattenChildren(_render(ctx));
@@ -321,13 +361,8 @@ exports.default = {
     createElement: _createElement,
     Component: _react2.default.Component,
     render: _reactDom2.default.render,
+    regisiter: regisiter,
     createContext: function createContext(component) {
         return new Context(component);
-    },
-    regisiter: function regisiter(registrations) {
-        registrations = registrations || {};
-        for (var name in registrations) {
-            components[name] = registrations[name];
-        }
     }
 };

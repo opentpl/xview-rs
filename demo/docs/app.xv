@@ -1,0 +1,8 @@
+<style>
+    body{
+        /* background: gray; */
+    }
+</style>
+<Page src="test.md"/>
+<hr>
+<Page src="test2.md"/>

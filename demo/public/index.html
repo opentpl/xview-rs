@@ -1,15 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>xview demo</title>
+    <script>
+        var Person = function (name) {
+            this.name = name;
+        }
+        Person.prototype.age = '11';
+        Person.age='12';
+        var yaoming = {}// new Person('ym');
+        yaoming.age='123'
+        console.log(yaoming.name);
+        console.log(yaoming.age); //11
+        console.log(yaoming.constructor);
+    </script>
 </head>
+
 <body>
     <h1>xview demo1</h1>
     <div id="root"></div>
     <script src="../build/vendor.js"></script>
     <script src="../build/app.js"></script>
 </body>
+
 </html>
